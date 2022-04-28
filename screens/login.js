@@ -1,17 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Image, Pressable, Alert} from 'react-native';
 import * as api from "../api/MyApi";
+import * as dbAPI from "../api/DB";
 import SQLite from 'react-native-sqlite-storage';
-
-const db = SQLite.openDatabase(
-  {
-    name: "MessangerDB",
-    location:"default"
-  },
-  () => { },
-  error => {console.log(error)}
-)
-
 export default class App extends React.Component {
 
   constructor(props){
@@ -27,7 +18,6 @@ export default class App extends React.Component {
     this.onEmailChange = this.onEmailChange.bind(this);
     this.onPasswordChange = this.onPasswordChange.bind(this);
     this.login_btn = this.login_btn.bind(this);
-
   }  
 
   // state methods
@@ -55,91 +45,34 @@ export default class App extends React.Component {
     this.setState({password: password, passwordValid: validPassword})
     this.validateForm()
   }
-
-//   // Database methods
-  createAllTables = () => {
-    db.transaction((tx) => {
+  // DB methods
+  addUser = (user_id, token, active=true) => {
+    const db = SQLite.openDatabase({name : "App.db"})
+    return db.transaction(tx => {
         tx.executeSql(
-            "CREATE TABLE IF NOT EXISTS "
-            + "Users"
-            + "(user_id INTEGER PRIMARY KEY, token TEXT NOT NULL);"
-            + "CREATE TABLE IF NOT EXISTS"
-            + "Chats"
-            + "(chat_id INTEGER PRIMARY KEY, key TEXT);"
+            "INSERT INTO USERS VALUES(?, ?, ? )",
+            [user_id, token, active],
+            () => {
+                console.log("row inserted successsfully");
+
+            },
+            error => {
+                console.log("error after inserting row");
+                console.log(error.message);
+        }
         )
     })
-  }
-
-
-  setUserData = async (user_id, token, active=true) => {
-    try {
-        await db.transaction(async (tx) => {
-            await tx.executeSql(
-                "INSERT INTO Users (user_id, token, active) VALUES (?,?,?)",
-                [user_id, token, active],
-                (tx, results) => {
-                  if (results.rowsAffected > 0) {
-                    Alert.alert(
-                      'Success',
-                      'You are Registered Successfully'
-                      // ,
-                      // [
-                      //   {
-                      //     text: 'Ok',
-                      //     onPress: () => navigation.navigate('HomeScreen'),
-                      //   },
-                      // ],
-                      // { cancelable: false }
-                    );
-                  } else Alert.alert("error", 'Registration Failed');
-                }
-            );
-        })
-        return true;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-  }
-
-
-
-  getData = () => {
-    try {
-        db.transaction((tx) => {
-            tx.executeSql(
-                "SELECT user_id, token FROM Users",
-                [],
-                (tx, results) => {
-                    var len = results.rows.length;
-                    if (len > 0) {
-                        // navigation.navigate('Home');
-                        Alert.alert(results.rows.item(0).user_id.toString(), results.rows.item(0).token)
-                    }
-                }
-            )
-        })
-    } catch (error) {
-        console.log(error);
-    }
 }
-
-
-  
-
-  // Main screen method (request to API for login)
+  // Main screen method (request to API for login and inserting server response to the local DB)
   async login_btn(){
     if (this.state.formValid){
       let login = this.state.email;
       let password = this.state.password;
     try{
+      dbAPI.createTables();
       const response = await api.login(login, password);
       if (await response.status === true){
-        if (this.setUserData(response.user_id, response.token) === true) {
-          Alert.alert(response.user_id.toString(), response.token);
-        }else{
-          Alert.alert("error", "local db didn't insert values =(");
-        }
+        result = this.addUser(await response.user_id, await response.token, true);
       }
       else{
         if(await response.db_error === true){
@@ -157,7 +90,8 @@ export default class App extends React.Component {
       
     }
     catch(error){
-      console.error(error);
+      console.error(error.message);
+      Alert.alert("Error", "Something went wrong. Try again.");
     }
     }
   }
@@ -204,7 +138,6 @@ export default class App extends React.Component {
         onPress={this.login_btn}>
           <Text style={styles.loginText}>LOGIN</Text>
         </Pressable>
-
       </View>
     );
   }

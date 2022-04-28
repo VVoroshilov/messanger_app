@@ -19,7 +19,6 @@ import {
 } from 'react-native';
 
 import Login from "./screens/login";
-import * as api from "./api/MyApi";
 
 
 const App: () => Node = () => {
