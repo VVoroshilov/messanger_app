@@ -92,7 +92,7 @@ export const get_chats = async (user_id, token) => {
         "token": token
     };
     const request_data = JSON.stringify(json_body);
-    const request = new Request('https://vvspi203.pythonanywhere.com/chats/get', {
+    const request = new Request('https://vvspi203.pythonanywhere.com/chats/', {
         method: 'POST',
         body: request_data,
         headers: {
@@ -103,14 +103,16 @@ export const get_chats = async (user_id, token) => {
     return await fetch(request)
         .then((response) => {
             if(response.ok){
-                console.log("ok")
+                console.log("chats get reqest: 200")
                 return response.json()
             }else{
-                console.log("not ok")
+                console.log("chats get reqest: 404")
+                return {db_error: true, status: false}
             }
         })
         .catch((err) => {
             console.error("error")
+            return {db_error: true, status: false}
         })
 }
 

@@ -1,8 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Image, Pressable, Alert} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as api from "../api/MyApi";
 import * as dbAPI from "../api/DB";
 import SQLite from 'react-native-sqlite-storage';
+
 export default class App extends React.Component {
 
   constructor(props){
@@ -18,7 +21,12 @@ export default class App extends React.Component {
     this.onEmailChange = this.onEmailChange.bind(this);
     this.onPasswordChange = this.onPasswordChange.bind(this);
     this.login_btn = this.login_btn.bind(this);
-  }  
+    this.getUser = this.getUser.bind(this);
+  }
+  
+  componentDidMount(){
+    this.getUser();
+  }
 
   // state methods
   validateEmail(email){
@@ -63,8 +71,34 @@ export default class App extends React.Component {
         )
     })
 }
+
+
+getUser = () => {
+  const db = SQLite.openDatabase({name : "App.db"});
+  return db.transaction(tx => {
+          tx.executeSql(
+              "SELECT * FROM USERS",
+              [],
+              (sqlTxn, res) => {
+                  if(res.rows.length > 0){
+                    this.props.navigation.navigate("Main");
+                  }else{
+                      console.log("nothing selected")
+                  }
+              },
+              error => {
+                  console.log("error after selecting rows");
+                  console.log(error.message);
+              }
+          )
+      })
+}
+
+
+
   // Main screen method (request to API for login and inserting server response to the local DB)
   async login_btn(){
+    dbAPI.deleteUser();
     if (this.state.formValid){
       let login = this.state.email;
       let password = this.state.password;
@@ -73,6 +107,7 @@ export default class App extends React.Component {
       const response = await api.login(login, password);
       if (await response.status === true){
         result = this.addUser(await response.user_id, await response.token, true);
+        this.props.navigation.navigate("Main");
       }
       else{
         if(await response.db_error === true){
@@ -138,6 +173,13 @@ export default class App extends React.Component {
         onPress={this.login_btn}>
           <Text style={styles.loginText}>LOGIN</Text>
         </Pressable>
+
+        <Pressable 
+          style={{marginTop: 10, marginBottom:15}}
+          onPress={() => this.props.navigation.navigate("Signup")}>
+            <Text style={styles.signupText}>New there? Sign up.</Text>
+          </Pressable>
+
       </View>
     );
   }
