@@ -190,7 +190,7 @@ export default class App extends React.Component {
               onChangeText={this.onBioChange}
               multiline={true} 
               numberOfLines={4}
-              maxLength={100} />
+              maxLength={200} />
           </View>
           <Pressable
           style={({ pressed }) => [

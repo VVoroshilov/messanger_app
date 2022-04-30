@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as api from "../api/MyApi";
 import * as dbAPI from "../api/DB";
 import SQLite from 'react-native-sqlite-storage';
-import ChatListItem from "./chat_list_item";
+import ChatListItem from "../components/chat_list_item";
 export default class App extends React.Component {
 
   constructor(props){
@@ -84,7 +84,8 @@ export default class App extends React.Component {
               user_id: this.state.user_id, 
               token: this.state.token, 
               nickname: item.nickname, 
-              picture: item.picture})}
+              receiver_id:null,
+              picture: item.picture,})}
           />
           );
         };

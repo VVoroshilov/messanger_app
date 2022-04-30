@@ -18,7 +18,7 @@ export default class App extends Component {
   const message_title = isMyMessage(message.sender_id, user_id) === true? "Me: " : this.props.nickname;
 
   return (
-    <View style={[styles.container, {backgroundColor: isMyMessage(message.sender_id, user_id) === true ? "#e7fecc" : "#FFFFFF"}]}>
+    <View style={[styles.container, {backgroundColor: isMyMessage(message.sender_id, user_id) === true ? "#f7cf46" : "#FFFFFF"}]}>
         <View style={styles.col}>
             <View style={styles.chat_header}>
                 <Text style={styles.name}>
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       padding: 12,
       borderBottomColor: '#000000',
-      borderBottomWidth: 0.4,
+      borderBottomWidth: 0.5,
     },
     multimedia_view:{
         flex:1,

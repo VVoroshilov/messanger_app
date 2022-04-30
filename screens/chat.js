@@ -4,7 +4,9 @@ import { StyleSheet, Text, View, TextInput, Image, Pressable, Alert, FlatList, A
 import * as api from "../api/MyApi";
 import * as dbAPI from "../api/DB";
 import SQLite from 'react-native-sqlite-storage';
-import Message from "./message";
+import Message from "../components/message";
+import ChatBar from "../components/chat_bar";
+import InputBar from "../components/input_bar";
 import { Avatar } from 'react-native-paper';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 
@@ -19,10 +21,12 @@ export default class App extends React.Component {
         token: this.props.token,
         chat_id: this.props.chat_id,
         picture: this.props.picture,
-        nickname: this.props.nickname
+        nickname: this.props.nickname,
+        receiver_id: this.props.receiver_id,
+        flex: 0.07, 
     }
     this.get_messages_data = this.get_messages_data.bind(this);
-    // this.get_messages_data();
+    this.get_messages_data();
   }  
   // Main screen method (request to API for login and inserting server response to the local DB)
     async get_messages_data(){
@@ -64,25 +68,30 @@ export default class App extends React.Component {
   render(){
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.window_header}>
-                <TouchableOpacity onPress={console.log("pressed")}>
-                    <Icons name={'arrow-back'} size={30} color='#fff' style={{marginLeft: '3%'}}/>
-                </TouchableOpacity>
-
-                <Avatar.Image size={50} source={{uri: `data:image/jpeg;base64,${this.state.picture}`}} />
-                <View style={styles.chat_header}>
-                    <Text style={styles.name}>
-                        {this.state.nickname}
-                    </Text>
-                </View>
-            </TouchableOpacity>
-            <View>
-                {/* <FlatList
+            <View style={{flex:0.1}}>
+                <ChatBar 
+                    picture={this.state.picture} 
+                    nickname={this.state.nickname} 
+                    onPressBtn= {() => console.log("button pressed")}
+                    onPressBar={() => console.log("bar pressed")}/>
+            </View>
+            <View style={{flex:0.9-(this.state.flex-0.07)}}>
+                <FlatList
                 data={this.state.data}
                 renderItem={this.renderItem}
                 keyExtractor={item => item.message_id}
                 ListEmptyComponent={<View style={{flex:1, alignItems: "center", justifyContent:"center"}}><ActivityIndicator size="large" /></View>}
-                /> */}
+                />
+            </View>
+            <View style={{flex: this.state.flex}}>
+                <InputBar
+                    chat_id={this.state.chat_id} 
+                    user_id= {this.state.user_id}
+                    token= {this.state.token}
+                    receiver_id={this.state.receiver_id}
+                    changeBar={(inputBarHeight) => this.setState({flex: inputBarHeight})}
+                    refresh={this.get_messages_data}
+                    />
             </View>
         </View>
 

@@ -150,24 +150,15 @@ export const get_messages = async (user_id, token, chat_id, mes_amount = 50, mes
 
 
 export const send_message = async (user_id, token, chat_id, receiver_id =null, message_text=null, multimedia=null) => {
-    if (receiver_id === null){
-        const json_body = {
-            "user_id": user_id,
-            "token": token,
-            "chat_id": chat_id,
-            "message_text": message_text,
-            "multimedia": multimedia
-        };
-    }else{
-        const json_body = {
-            "user_id": user_id,
-            "token": token,
-            "receiver_id": receiver_id,
-            "message_text": message_text,
-            "multimedia": multimedia
-        };
-    }
 
+    const json_body = {
+        "user_id": user_id,
+        "token": token,
+        "chat_id": chat_id,
+        "receiver_id": receiver_id,
+        "message_text": message_text,
+        "multimedia": multimedia
+    };
     const request_data = JSON.stringify(json_body);
     const request = new Request('https://vvspi203.pythonanywhere.com/message', {
         method: 'POST',
