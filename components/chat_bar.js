@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity, Image, Text, View} from 'react-native';
+import {StyleSheet, SafeAreaView, TouchableOpacity, Image, Text, View} from 'react-native';
 import { Avatar } from 'react-native-paper';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 
@@ -19,7 +19,7 @@ export default class App extends React.Component {
     
     render(){
       return (
-            <View style={styles.window_header}>
+            <SafeAreaView style={styles.window_header}>
                 <TouchableOpacity style={styles.backBtn} onPress={() => this.state.onPressBtn()}>
                     <Icons name={'arrow-back'} size={30} color='#fff' style={{marginLeft: '0%'}}/>
                 </TouchableOpacity>
@@ -32,7 +32,7 @@ export default class App extends React.Component {
                         </Text>
                     </View>
                 </TouchableOpacity>
-            </View>
+            </SafeAreaView>
       );
     }
   }

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity, Image, Text, View, TextInput, AppRegistry, Alert} from 'react-native';
+import {StyleSheet, SafeAreaView, TouchableOpacity, Image, Text, View, TextInput, AppRegistry, Alert} from 'react-native';
 import Icons from 'react-native-vector-icons/AntDesign';
 import * as api from '../api/MyApi';
 export default class App extends React.Component {
@@ -60,7 +60,7 @@ export default class App extends React.Component {
 
     render(){
       return (
-            <View style={styles.window_header} onPress={() => this.state.onPressSend()}>
+            <SafeAreaView style={styles.window_header} onPress={() => this.state.onPressSend()}>
                 <TouchableOpacity style={{width:"10%", alignItems: "center"}}onPress={() => this.state.onPressAtch()}>
                     <Icons name={'paperclip'} size={30} color='#fff' style={{marginLeft: '0%'}}/>
                 </TouchableOpacity>
@@ -83,7 +83,7 @@ export default class App extends React.Component {
                 <TouchableOpacity onPress={this.send_message_btn}>
                     <Icons name={'enter'} size={30} color='#fff' style={{marginLeft: '0%'}}/>
                 </TouchableOpacity>
-            </View>
+            </SafeAreaView>
       );
     }
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, Image, Pressable, Alert, FlatList} from 'react-native';
+import { StyleSheet, SafeAreaView, Text, View, TextInput, Image, Pressable, Alert, FlatList} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as api from "../api/MyApi";
@@ -85,29 +85,32 @@ export default class App extends React.Component {
               token: this.state.token, 
               nickname: item.nickname, 
               receiver_id:null,
-              picture: item.picture,})}
+              companion_id: item.user_id,
+              picture: item.picture})}
           />
           );
         };
 
   render(){
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <FlatList
             data={this.state.data}
             user={this.state.user_id}
             renderItem={this.renderItem}
             keyExtractor={item => item.chat_id}
             />
-        </View>
+        </SafeAreaView>
 
     );
   }
 }
 
 const styles = StyleSheet.create({
+  
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: "#FFFFFF"
   },
   logo:{
     fontWeight:"bold",
