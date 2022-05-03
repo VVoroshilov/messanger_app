@@ -98,7 +98,7 @@ export default class App extends React.Component {
           "Success",
           "Your account was registered",
           [
-            { text: "Login", onPress: () => this.props.navigation.navigate("Login") }
+            { text: "Login", onPress: () => this.props.navigation.replace("Login") }
           ]
         )
       }

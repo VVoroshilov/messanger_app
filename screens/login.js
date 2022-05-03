@@ -107,7 +107,7 @@ getUser = () => {
       const response = await api.login(login, password);
       if (await response.status === true){
         result = this.addUser(await response.user_id, await response.token, true);
-        this.props.navigation.navigate("Main");
+        this.props.navigation.replace("Main");
       }
       else{
         if(await response.db_error === true){

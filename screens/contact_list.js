@@ -1,27 +1,42 @@
 import React from 'react';
-import { StyleSheet, SafeAreaView, Text, View, TextInput, Image, Pressable, Alert, FlatList, ActivityIndicator} from 'react-native';
+import { StyleSheet, SafeAreaView, Text, View, TextInput, TouchableOpacity, Image, Pressable, Alert, FlatList, ActivityIndicator} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as api from "../api/MyApi";
-import * as dbAPI from "../api/DB";
 import SQLite from 'react-native-sqlite-storage';
-import ChatListItem from "../components/chat_list_item";
+import ContactListItem from "../components/contact_list_item";
+import Icons from 'react-native-vector-icons/AntDesign';
 export default class App extends React.Component {
 
   constructor(props){
     super(props);
 
     this.state={
+        username:"",
         user_id: null,
-        token: null,
-        data: null,
-        refresh: 0,
+        token: null, 
+        data: null
     }
-    this.getUser = this.getUser.bind(this);
-    this.get_chats_data = this.get_chats_data.bind(this);
+    this.getUser =  this.getUser.bind(this);
+    this.getUser();
+    this.search_user = this.search_user.bind(this);
+    this.onUsernameChange = this.onUsernameChange.bind(this);
   }  
 
-  // DB methods
+  componentDidMount(){
+    this.getUser();
+    this.willFocusSubscription = this.props.navigation.addListener(
+      'focus',
+      () => {
+        this.getUser();
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    this.willFocusSubscription();
+  }
+
   getUser = () => {
     const db = SQLite.openDatabase({name : "App.db"});
     return db.transaction(tx => {
@@ -48,16 +63,22 @@ export default class App extends React.Component {
             )
         })
 }
+
+
+  onUsernameChange(username){
+    this.setState({username: username});
+  }
+
   // Main screen method (request to API for login and inserting server response to the local DB)
-    async get_chats_data(){
-        console.log("fetching data");
-      if (this.state.user_id != null && this.state.token != null){
-          console.log("api post /chats request send");
-        server_response = await api.get_chats(this.state.user_id, this.state.token);
+    async search_user(){
+      if (this.state.username.length > 1){
+            console.log("post /user/find");
+        server_response = await api.find_user(this.state.username);
         if (await server_response.status === true){
-            console.log("got reponse with chats")
-            console.log(await server_response)
-            this.setState(this.state.data = await server_response.response)
+            console.log("got response from server")
+            if(await server_response.response[0].user_id != null){
+                this.setState(this.state.data = await server_response.response)
+            }
         }else{
             if (await server_response.db_error === true){
                 // Alert.alert("Error", 
@@ -65,7 +86,7 @@ export default class App extends React.Component {
                 // [
                 //     { text: "OK", onPress: () => this.get_chats_data() }
                 // ]);
-                this.get_chats_data()
+                this.search_user()
             }else{
                 // Тут вывести, что пара id + токен недействительна на сервере.
             }
@@ -75,33 +96,14 @@ export default class App extends React.Component {
       }
     }
 
-    componentDidMount(){
-      this.willFocusSubscription = this.props.navigation.addListener(
-        'focus',
-        () => {
-          this.getUser();
-        }
-      );
-    }
-
-    componentWillUnmount() {
-      this.willFocusSubscription();
-    }
-
-
     renderItem = ({item}) => {
         return (
-          <ChatListItem
-            chat={item}
-            onPress={() => {
-            this.props.navigation.push("Chat" , 
-            { chat_id: item.chat_id, 
-              user_id: this.state.user_id, 
-              token: this.state.token, 
-              nickname: item.nickname, 
-              receiver_id:null,
-              companion_id: item.user_id,
-              picture: item.picture})}}
+          <ContactListItem
+            user={item}
+            onPress={
+            () => this.props.navigation.push("Profile", {find_user_id: this.state.data[0].user_id, sender_id: this.state.user_id,
+              token: this.state.token})
+        }
           />
           );
         };
@@ -109,12 +111,27 @@ export default class App extends React.Component {
   render(){
     return (
         <SafeAreaView style={styles.container}>
+
+            <View style={styles.header_container}>
+                <View style={styles.inputView} >
+                    <TextInput  
+                        style={styles.inputText}
+                        placeholder="Username..." 
+                        placeholderTextColor="#FFFFFF"
+                        maxLength={45}
+                        onChangeText={this.onUsernameChange}/>
+                </View>
+                <TouchableOpacity style={styles.backBtn} onPress={() => this.search_user()}>
+                        <Icons name={'enter'} size={30} color='#fff' style={{marginLeft: '0%'}}/>
+                </TouchableOpacity>
+            </View>
+
             <FlatList
             data={this.state.data}
-            user={this.state.user_id}
+            extraData={this.state.data}
             renderItem={this.renderItem}
-            keyExtractor={item => item.chat_id}
-            ListEmptyComponent={<View style={{marginTop:"60%"}}><ActivityIndicator size="large"/></View>}
+            keyExtractor={item => item.user_id}
+            ListEmptyComponent={<View style={{marginTop:"60%", marginLeft:"30%"}}><Text style={{color: "#FFFFFF"}}>Find people by username</Text></View>}
             />
         </SafeAreaView>
 
@@ -123,7 +140,12 @@ export default class App extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  
+    header_container:{
+        flexDirection: "row",
+        alignItems:"center",
+        justifyContent: "center"
+    },
+
   container: {
     flex: 1,
     backgroundColor: "#000000"
@@ -135,22 +157,25 @@ const styles = StyleSheet.create({
     marginBottom:40
   },
   inputView:{
-    width:"80%",
-    backgroundColor:"#FFFFFF",
-    borderRadius:25,
+    flex: 0.8 ,
+    backgroundColor:"#24303f",
+    borderRadius:10,
     height:50,
     justifyContent:"center",
     padding:20,
+    marginTop: 15,
     borderColor: "#000000",
     borderWidth: 1
-  },
+  },  
+    backBtn:{
+    flex: 0.15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 5
+},
   inputText:{
     height:50,
-    color:"#000000"
-  },
-  forgot:{
-    color:"white",
-    fontSize:11
+    color:"#FFFFFF"
   },
   loginBtn:{
     width:"80%",
@@ -160,24 +185,5 @@ const styles = StyleSheet.create({
     justifyContent:"center",
     marginTop:40,
     marginBottom:10
-  },
-  loginText:{
-    color:"#FFFFFF"
-  },
-  signupText:{
-    color:"#000000"
-  },
-  image: {
-    marginBottom: 20,
-    width: 100,
-    height: 100
-  },
-  errorView: {
-    width:"70%",
-    marginBottom: 10
-  },
-  textError: {
-    fontSize: 12, 
-    alignSelf: "flex-start"
   }
 });

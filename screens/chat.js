@@ -15,6 +15,7 @@ export default class App extends React.Component {
 
   constructor(props){
     super(props);
+    this.props.navigation.setOptions({tabBarStyle: {display: "none"}})
 
     this.state={
         data: [],
@@ -23,26 +24,47 @@ export default class App extends React.Component {
         user_id: this.props.route.params.user_id,
         token: this.props.route.params.token,
         chat_id: this.props.route.params.chat_id,
-        picture: this.props.route.params.picture != null? this.props.route.params : defaultPicture,
+        picture: this.props.route.params.picture != null? this.props.route.params.picture : defaultPicture,
         nickname: this.props.route.params.nickname,
         receiver_id: this.props.route.params.receiver_id,
-        flex: 0.07, 
+        flex: 0.15, 
         message_skip: 0
     }
     this.get_messages_data = this.get_messages_data.bind(this);
-    this.get_messages_data();
+    this.get_older_messages = this.get_older_messages.bind(this);
   }  
+
+  componentDidMount(){
+    this.get_messages_data();
+    this.willFocusSubscription = this.props.navigation.addListener(
+      'focus',
+      () => {
+        this.get_messages_data();
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    this.willFocusSubscription();
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+    if (nextState.data != this.state.data){
+      return true
+    }
+    return false
+  }
+
+
   // Main screen method (request to API for login and inserting server response to the local DB)
-    async get_messages_data(mes_amount = 30, mes_skip = this.state.message_skip){
+    async get_messages_data(mes_amount = 30, mes_skip = 0){
         console.log("fetching messages data");
       if (this.state.user_id != null && this.state.token != null && this.state.chat_id != null){
           console.log("api post /messages/get request send");
         server_response = await api.get_messages(this.state.user_id, this.state.token, this.state.chat_id, mes_amount, mes_skip);
         if (await server_response.status === true){
             console.log("got reponse with messages")
-            this.setState({data: this.state.data.concat(await server_response.response)})
-            
-            this.setState({message_skip: this.state.message_skip + 30})
+            this.setState({data: await server_response.response})
         }else{
             if (await server_response.db_error === true){
                 // Alert.alert("Error", 
@@ -56,8 +78,13 @@ export default class App extends React.Component {
             }
         }
       }else{
-          console.log("user_id null");
+          console.log("something is null");
       }
+    } 
+
+    get_older_messages(){
+      this.get_messages_data(30 + (this.state.message_skip + 30));
+      this.setState({message_skip: this.state.message_skip + 30});
     }
 
     renderItem = ({item}) => {
@@ -73,22 +100,27 @@ export default class App extends React.Component {
   render(){
     return (
         <SafeAreaView style={styles.container}>
-            <View style={{flex:0.1}}>
+            <View style={{height: 60}}>
                 <ChatBar 
                     picture={this.state.picture} 
                     nickname={this.state.nickname} 
+                    sender_id={this.state.user_id}
+                    token={this.state.token}
                     onPressBtn= {() => this.props.navigation.goBack()}
-                    onPressBar={() => this.props.navigation.push("Profile", {find_user_id: this.state.companion_id})}/>
+                    onPressBar={() => this.props.navigation.push("Profile", {
+                      find_user_id: this.state.companion_id,
+                      sender_id: this.state.user_id,
+                      token: this.state.token })}/>
             </View>
-            <View style={{flex:0.9-(this.state.flex-0.07)}}>
+            <View style={{flex:1-(this.state.flex-0.15)}}>
                 <FlatList
                 data={this.state.data}
                 renderItem={this.renderItem}
                 keyExtractor={item => item.message_id}
                 ListEmptyComponent={<View style={{marginTop:"60%"}}><ActivityIndicator size="large"/></View>}
                 inverted={true}
-                onEndReachedThreshold={0}
-                onEndReached={this.get_messages_data}
+                onEndReachedThreshold={0.1}
+                onEndReached={this.get_older_messages}
                 extraData={this.state.data}
                 />
             </View>
@@ -100,6 +132,7 @@ export default class App extends React.Component {
                     receiver_id={this.state.receiver_id}
                     changeBar={(inputBarHeight) => this.setState({flex: inputBarHeight})}
                     refresh={this.get_messages_data}
+                    setChat={(chat_id) => this.setState({chat_id: chat_id})}
                     />
             </View>
         </SafeAreaView>
@@ -111,7 +144,7 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#1a222c"
   },
   window_header:{
       flex:0.1,

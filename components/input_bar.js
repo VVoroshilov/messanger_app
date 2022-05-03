@@ -14,6 +14,7 @@ export default class App extends React.Component {
         token: this.props.token,
         receiver_id: this.props.receiver_id,
         refreshChat: this.props.refresh,
+        setChat: this.props.setChat,
         message_text: "",
         multimedia:[],
         height: 35,
@@ -42,7 +43,9 @@ export default class App extends React.Component {
                 const response = await api.send_message(user_id, token, chat_id, receiver_id, message_text, multimedia);
                 if (await response.status === true){
                     this.setState({message_text:"", multimedia: []});
-                    this.state.refreshChat();
+                    this.setState({chat_id:  await response.chat_id});
+                    this.state.setChat(this.state.chat_id);
+                    this.state.refreshChat(await response.chat_id - await response.chat_id + 30);
                   }
                   else{
                     if(await response.db_error === true){
@@ -60,8 +63,8 @@ export default class App extends React.Component {
 
     render(){
       return (
-            <SafeAreaView style={styles.window_header} onPress={() => this.state.onPressSend()}>
-                <TouchableOpacity style={{width:"10%", alignItems: "center"}}onPress={() => this.state.onPressAtch()}>
+            <SafeAreaView style={styles.window_header} >
+                <TouchableOpacity style={{width:"10%", alignItems: "center"}}onPress={() => console.log("attache button pressed")}>
                     <Icons name={'paperclip'} size={30} color='#fff' style={{marginLeft: '0%'}}/>
                 </TouchableOpacity>
   

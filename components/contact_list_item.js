@@ -6,26 +6,27 @@ const defaultPicture = "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAgMAAACJFjxpAAAADFBMVEXF
 
 export default class App extends Component {
   render = () => {
-  chat = this.props.chat;
+  user = this.props.user;
   onPress = this.props.onPress;
-  let last_message = chat.multimedia_amount === 0 ? chat.message_text : "Multimedia: " + chat.multimedia_amount;
-  let profile_picture = chat.picture != null ? chat.picture : defaultPicture;
+
+  let profile_picture = user.picture != null ? user.picture : defaultPicture;
+  let bio = user.bio == null? "Bio: empty..." : (user.bio.length > 40 ? ("Bio: " + user.bio.substring(0, 40) + "...") : "Bio: " + (user.bio));
   return (
     <TouchableOpacity style={styles.chat_container} onPress={onPress}>
-        <Avatar.Image size={50} source={{uri: `data:image/jpeg;base64,${profile_picture}`}} />
+        <Avatar.Image size={50} source={{uri: `data:image/jpeg;base64,${profile_picture}`}} style={{backgroundColor: "#FFFFFF"}} />
         <View style={styles.col}>
             <View style={styles.chat_header}>
                 <Text style={styles.name}>
-                    {chat.nickname}
+                    {user.nickname}
                 </Text>
 
                 <Text style={styles.time}>
-                    {chat.sending_time}
+                    {user.username}
                 </Text>
             </View>
 
             <Text style={styles.email}>
-                {last_message}
+                {bio}
             </Text>
         </View>
     </TouchableOpacity>
@@ -40,9 +41,9 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       padding: 12,
-      backgroundColor: "#1a222c",
-      borderBottomColor: '#b0b0b0',
-      borderBottomWidth: 0.4,
+      backgroundColor: "#000000",
+      borderBottomColor: '#FFFFFF',
+      borderBottomWidth: 0.5,
     },
       avatar: {
       width: 50,
@@ -60,11 +61,11 @@ const styles = StyleSheet.create({
     },
     time: {
         fontSize: 12,
-        color: '#2e2e2e'},
+        color: '#727e8c'},
     email: {
       marginTop: 10,
       fontSize: 13,
-      color: '#2e2e2e',
+      color: '#727e8c',
     },
     chat_header:{
         flex:1,

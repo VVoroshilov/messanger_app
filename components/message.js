@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {StyleSheet, TouchableOpacity, Image, Text, View} from 'react-native';
 
+
 export default class App extends Component {
   render = () => {
   const message = this.props.message;
@@ -10,7 +11,8 @@ export default class App extends Component {
     return(  <Image source={{uri: `data:image/jpeg;base64,${picture}`}} key={picture} resizeMode={'contain'} style={styles.picture}
     />)
   })
-  const sending_time = message.sending_time;
+
+  const sending_time = message.sending_time
   const message_text = message.message_text === null ? null : message.message_text;
   const isMyMessage = (sender_id, my_id) => {
     return sender_id === my_id
@@ -18,7 +20,9 @@ export default class App extends Component {
   const message_title = isMyMessage(message.sender_id, user_id) === true? "Me: " : this.props.nickname;
 
   return (
-    <View style={[styles.container, {backgroundColor: isMyMessage(message.sender_id, user_id) === true ? "#f7cf46" : "#FFFFFF"}]}>
+    <View style={[styles.container, 
+    {backgroundColor: isMyMessage(message.sender_id, user_id) === true ? "#486a93" : "#24303f"},
+    {marginLeft: isMyMessage(message.sender_id, user_id) === true ? "25%" : "5%"}]}>
         <View style={styles.col}>
             <View style={styles.chat_header}>
                 <Text style={styles.name}>
@@ -30,7 +34,7 @@ export default class App extends Component {
                 </Text>
             </View>
 
-            <Text style={styles.email}>
+            <Text style={styles.message}>
                 {message_text}
             </Text>
 
@@ -47,11 +51,12 @@ export default class App extends Component {
 const styles = StyleSheet.create({
     container: {
       flex:1,
+      width: "70%",
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       padding: 12,
-      borderBottomColor: '#000000',
-      borderBottomWidth: 0.5,
+      borderRadius: 35,
+      margin:5
     },
     multimedia_view:{
         flex:1,
@@ -65,6 +70,7 @@ const styles = StyleSheet.create({
       height: 200,
       borderRadius: 3,
       margin: 5,
+      resizeMode: 'contain'
     },
     col: {
         flex:1,
@@ -73,18 +79,19 @@ const styles = StyleSheet.create({
     },
     name: {
       fontSize: 16,
-      color: '#2e2e2e',
+      color: '#FFFFFF',
     },
     time: {
         fontSize: 12,
-        color: '#2e2e2e',      },
-    email: {
+        color: '#8d9baa',      },
+    message: {
       marginTop: 10,
-      fontSize: 13,
-      color: '#000000',
+      fontSize: 14,
+      color: '#FFFFFF',
     },
     chat_header:{
         flex:1,
-        alignItems: "baseline",
+        alignItems: "flex-start",
+        justifyContent: "space-between"
     }
   });

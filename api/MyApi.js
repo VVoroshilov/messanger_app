@@ -151,14 +151,19 @@ export const get_messages = async (user_id, token, chat_id, mes_amount = 50, mes
 
 export const send_message = async (user_id, token, chat_id, receiver_id =null, message_text=null, multimedia=null) => {
 
-    const json_body = {
+    let json_body = {
         "user_id": user_id,
         "token": token,
-        "chat_id": chat_id,
-        "receiver_id": receiver_id,
         "message_text": message_text,
         "multimedia": multimedia
     };
+
+    if(receiver_id == null){
+        json_body.chat_id = chat_id
+    }else{
+        json_body.receiver_id = receiver_id
+    }
+    
     const request_data = JSON.stringify(json_body);
     const request = new Request('https://vvspi203.pythonanywhere.com/message', {
         method: 'POST',
@@ -190,7 +195,7 @@ export const load_user_pic = async (user_id, token, picture) => {
         "picture": picture,
     };
     const request_data = JSON.stringify(json_body);
-    const request = new Request('https://vvspi203.pythonanywhere.com/user_pic', {
+    const request = new Request('https://vvspi203.pythonanywhere.com/user/picture', {
         method: 'POST',
         body: request_data,
         headers: {
@@ -218,7 +223,64 @@ export const get_user_pic = async (user_id)  =>{
         "user_id": user_id
     };
     const request_data = JSON.stringify(json_body);
-    const request = new Request('https://vvspi203.pythonanywhere.com/user_pic/get', {
+    const request = new Request('https://vvspi203.pythonanywhere.com/user/picture/get', {
+        method: 'POST',
+        body: request_data,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return await fetch(request)
+        .then((response) => {
+            if(response.ok){
+                console.log("ok")
+                return response.json()
+            }else{
+                console.log("not ok")
+            }
+        })
+        .catch((err) => {
+            return null;
+        })
+}
+
+
+export const logout = async (user_id, token)  =>{
+    const json_body = {
+        "user_id": user_id,
+        "token": token
+    };
+    const request_data = JSON.stringify(json_body);
+    const request = new Request('https://vvspi203.pythonanywhere.com/user/session', {
+        method: 'PUT',
+        body: request_data,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return await fetch(request)
+        .then((response) => {
+            if(response.ok){
+                console.log("ok")
+                return response.json()
+            }else{
+                console.log("not ok")
+            }
+        })
+        .catch((err) => {
+            return null;
+        })
+}
+
+
+export const find_user = async (username)  =>{
+    const json_body = {
+        "username": username
+    };
+    const request_data = JSON.stringify(json_body);
+    const request = new Request('https://vvspi203.pythonanywhere.com/user/find', {
         method: 'POST',
         body: request_data,
         headers: {

@@ -18,13 +18,14 @@ import {
   View,
 } from 'react-native';
 
-import Login from "./screens/login";
-import SignUp from "./screens/signup";
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Login from "./screens/login";
+import SignUp from "./screens/signup";
 import MainScreen from "./screens/main";
-import Chat from "./screens/chat";
-import PersonProfile from "./screens/person";
+import LoadScreen from "./screens/load_screen";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -32,7 +33,13 @@ const Stack = createNativeStackNavigator();
 const App: () => Node = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="LoadScreen">
+
+      <Stack.Screen 
+        name="LoadScreen" 
+        component={LoadScreen} 
+        options={{ headerShown: false }}/>
+
         <Stack.Screen 
         name="Signup" 
         component={SignUp} 
