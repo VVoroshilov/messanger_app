@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {StyleSheet, SafeAreaView, TouchableOpacity, Image, Text, View, TextInput, AppRegistry, Alert} from 'react-native';
 import Icons from 'react-native-vector-icons/AntDesign';
 import * as api from '../api/MyApi';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+
 export default class App extends React.Component {
 
     constructor(props){
@@ -21,6 +23,7 @@ export default class App extends React.Component {
       }
       this.onTextChange = this.onTextChange.bind(this);
       this.send_message_btn = this.send_message_btn.bind(this);
+      this.openGallery = this.openGallery.bind(this);
     }  
 
     onTextChange(text){
@@ -59,12 +62,36 @@ export default class App extends React.Component {
         }
     }
 
+    async openGallery(){
+      const options = {
+          mediaType: "photo",
+          includeBase64: true,
+          selectionLimit: 5
+          };
+      
+      await launchImageLibrary(options, async response => {
+      console.log('Response = ', response);
+      if (response.didCancel) {
+      console.log(`User cancelled image picker`);
+      } else if (response.error) {
+      console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+      console.log('User tapped custom button: ', response.customButton);
+      } else {
+          let multimedia = [];
+          await response.assets.forEach(element => multimedia.push(element.base64))
+          this.setState({multimedia: multimedia})
+      }
+  });
+      };
+
+
 
 
     render(){
       return (
             <SafeAreaView style={styles.window_header} >
-                <TouchableOpacity style={{width:"10%", alignItems: "center"}}onPress={() => console.log("attache button pressed")}>
+                <TouchableOpacity style={{width:"10%", alignItems: "center"}}onPress={this.openGallery}>
                     <Icons name={'paperclip'} size={30} color='#fff' style={{marginLeft: '0%'}}/>
                 </TouchableOpacity>
   
