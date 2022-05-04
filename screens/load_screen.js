@@ -14,7 +14,16 @@ export default class App extends React.Component {
   }
   
   componentDidMount(){
-    this.getUser();
+    this.willFocusSubscription = this.props.navigation.addListener(
+      'focus',
+      () => {
+        this.getUser();
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    this.willFocusSubscription();
   }
 
 
