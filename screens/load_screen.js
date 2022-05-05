@@ -14,6 +14,7 @@ export default class App extends React.Component {
   }
   
   componentDidMount(){
+    dbAPI.createTables();
     this.willFocusSubscription = this.props.navigation.addListener(
       'focus',
       () => {
